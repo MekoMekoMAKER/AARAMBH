@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
-    "build": "mkdir -p dist && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit"
@@ -36,7 +36,7 @@
     "react-dom": "^19.0.1"
   },
   "engines": {
-    "node": "24.x"
+    "node": "22.x"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
