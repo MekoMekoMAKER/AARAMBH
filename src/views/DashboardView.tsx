@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { BrainCircuit } from '../components/Icons';
 import { UserStats, XP_PER_LEVEL, StudyPlan, BookmarkedQuestion, MistakeRecord } from '../types';
-import { getXPProgress, cn } from '../lib/utils';
+import { getXPProgress, cn, safeGet, safeSet } from '../lib/utils';
 import { Link } from 'react-router-dom';
 import { generateStudyPlan } from '../services/geminiService';
 
@@ -40,10 +40,7 @@ export default function DashboardView({
   mistakes: MistakeRecord[];
 }) {
   const progress = getXPProgress(stats.xp);
-  const [studyPlan, setStudyPlan] = useState<StudyPlan | null>(() => {
-    const saved = localStorage.getItem('upsc_study_plan');
-    return saved ? JSON.parse(saved) : null;
-  });
+  const [studyPlan, setStudyPlan] = useState<StudyPlan | null>(() => safeGet('upsc_study_plan', null));
   const [generating, setGenerating] = useState(false);
 
   const handleGeneratePlan = async () => {
@@ -57,7 +54,7 @@ export default function DashboardView({
           generatedAt: new Date().toISOString()
         };
         setStudyPlan(newPlan);
-        localStorage.setItem('upsc_study_plan', JSON.stringify(newPlan));
+        safeSet('upsc_study_plan', newPlan);
       }
     } catch (error) {
       console.error(error);

@@ -130,7 +130,7 @@ export default function ProfileView({ stats, user, isGuest, setIsGuest, mistakes
         {user ? (
           <div className="relative z-10 space-y-4">
             <div className="w-24 h-24 rounded-3xl mx-auto border-4 border-indigo-500/30 overflow-hidden shadow-2xl rotate-3">
-              <img src={user.photoURL || `https://ui-avatars.com/api/?name=${user.email}`} alt="Avatar" className="w-full h-full object-cover" />
+              <img src={user.photoURL || `https://ui-avatars.com/api/?name=${user.email}`} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
             </div>
             <h2 className="text-2xl font-black text-white tracking-tight">{user.displayName || 'Aspirant'}</h2>
             <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">{user.email}</p>

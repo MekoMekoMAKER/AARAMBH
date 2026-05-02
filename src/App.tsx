@@ -24,7 +24,7 @@ import {
 import { BrainCircuit, Phoenix } from './components/Icons';
 import React from 'react';
 import { UserStats, TestResult, AppTheme, XP_PER_LEVEL, XP_PER_CORRECT, XP_COMPLETION_BONUS, AppData, BookmarkedQuestion, MistakeRecord, SyllabusState } from './types';
-import { calculateLevel, cn } from './lib/utils';
+import { calculateLevel, cn, safeGet, safeSet } from './lib/utils';
 import { differenceInDays, isYesterday, isToday } from 'date-fns';
 import ThemeSwitcher from './components/ThemeSwitcher';
 
@@ -69,25 +69,10 @@ export default function App() {
   const [isGuest, setIsGuest] = useState(() => localStorage.getItem('upsc_guest_mode') === 'true');
   const [loading, setLoading] = useState(true);
   
-  const [stats, setStats] = useState<UserStats>(() => {
-    const saved = localStorage.getItem('upsc_smart_quiz_stats');
-    return saved ? JSON.parse(saved) : INITIAL_STATS;
-  });
-
-  const [bookmarks, setBookmarks] = useState<BookmarkedQuestion[]>(() => {
-    const saved = localStorage.getItem('upsc_bookmarks');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [mistakes, setMistakes] = useState<MistakeRecord[]>(() => {
-    const saved = localStorage.getItem('upsc_mistakes');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [syllabus, setSyllabus] = useState<SyllabusState>(() => {
-    const saved = localStorage.getItem('upsc_syllabus_v2');
-    return saved ? JSON.parse(saved) : INITIAL_SYLLABUS;
-  });
+  const [stats, setStats] = useState<UserStats>(() => safeGet('upsc_smart_quiz_stats', INITIAL_STATS));
+  const [bookmarks, setBookmarks] = useState<BookmarkedQuestion[]>(() => safeGet('upsc_bookmarks', []));
+  const [mistakes, setMistakes] = useState<MistakeRecord[]>(() => safeGet('upsc_mistakes', []));
+  const [syllabus, setSyllabus] = useState<SyllabusState>(() => safeGet('upsc_syllabus_v2', INITIAL_SYLLABUS));
 
   const [isOnline, setIsOnline] = useState(dataService.isOnline());
   const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'offline'>(dataService.isOnline() ? 'synced' : 'offline');
@@ -118,10 +103,10 @@ export default function App() {
       const cloudData = await dataService.loadAppData();
       if (cloudData) {
         const localData: AppData = {
-          stats: JSON.parse(localStorage.getItem('upsc_smart_quiz_stats') || JSON.stringify(INITIAL_STATS)),
-          bookmarks: JSON.parse(localStorage.getItem('upsc_bookmarks') || '[]'),
-          mistakes: JSON.parse(localStorage.getItem('upsc_mistakes') || '[]'),
-          syllabus: JSON.parse(localStorage.getItem('upsc_syllabus_v2') || JSON.stringify(INITIAL_SYLLABUS))
+          stats: safeGet('upsc_smart_quiz_stats', INITIAL_STATS),
+          bookmarks: safeGet('upsc_bookmarks', []),
+          mistakes: safeGet('upsc_mistakes', []),
+          syllabus: safeGet('upsc_syllabus_v2', INITIAL_SYLLABUS)
         };
         
         const merged = dataService.mergeData(localData, cloudData);
@@ -156,10 +141,10 @@ export default function App() {
         const cloudData = await dataService.loadAppData();
         if (cloudData) {
           const localData: AppData = {
-            stats: JSON.parse(localStorage.getItem('upsc_smart_quiz_stats') || JSON.stringify(INITIAL_STATS)),
-            bookmarks: JSON.parse(localStorage.getItem('upsc_bookmarks') || '[]'),
-            mistakes: JSON.parse(localStorage.getItem('upsc_mistakes') || '[]'),
-            syllabus: JSON.parse(localStorage.getItem('upsc_syllabus_v2') || JSON.stringify(INITIAL_SYLLABUS))
+            stats: safeGet('upsc_smart_quiz_stats', INITIAL_STATS),
+            bookmarks: safeGet('upsc_bookmarks', []),
+            mistakes: safeGet('upsc_mistakes', []),
+            syllabus: safeGet('upsc_syllabus_v2', INITIAL_SYLLABUS)
           };
           
           const merged = dataService.mergeData(localData, cloudData);
@@ -190,10 +175,10 @@ export default function App() {
   });
 
   useEffect(() => {
-    localStorage.setItem('upsc_smart_quiz_stats', JSON.stringify(stats));
-    localStorage.setItem('upsc_bookmarks', JSON.stringify(bookmarks));
-    localStorage.setItem('upsc_mistakes', JSON.stringify(mistakes));
-    localStorage.setItem('upsc_syllabus_v2', JSON.stringify(syllabus));
+    safeSet('upsc_smart_quiz_stats', stats);
+    safeSet('upsc_bookmarks', bookmarks);
+    safeSet('upsc_mistakes', mistakes);
+    safeSet('upsc_syllabus_v2', syllabus);
     
     if (user) {
       dataService.saveAppData({ stats, bookmarks, mistakes, syllabus });
@@ -339,7 +324,7 @@ export default function App() {
 
             {user ? (
               <Link to="/profile" className="w-10 h-10 rounded-full border-2 border-indigo-500/50 overflow-hidden hover:scale-105 transition-transform">
-                <img src={user.photoURL || `https://ui-avatars.com/api/?name=${user.email}`} alt="User" />
+                <img src={user.photoURL || `https://ui-avatars.com/api/?name=${user.email}`} alt="User" referrerPolicy="no-referrer" />
               </Link>
             ) : (
               <button 

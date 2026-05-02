@@ -1,10 +1,21 @@
 import { GoogleGenAI } from "@google/genai";
 import { UserStats, TopicPrediction } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let aiInstance: any = null;
+function getAI() {
+  if (!aiInstance) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey === "undefined") {
+      throw new Error("GEMINI_API_KEY is not defined. Please configure it in your environment.");
+    }
+    aiInstance = new GoogleGenAI({ apiKey });
+  }
+  return aiInstance;
+}
 
 export async function generateStudyPlan(stats: UserStats) {
   try {
+    const ai = getAI();
     const prompt = `
       You are an expert UPSC preparation mentor. Based on the following aspirant's performance metrics, generate a highly personalized daily study plan.
       

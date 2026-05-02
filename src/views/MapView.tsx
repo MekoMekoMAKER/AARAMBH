@@ -90,10 +90,9 @@ export default function MapView() {
   const [difficulty, setDifficulty] = useState<'Easy' | 'Medium' | 'Hard'>('Easy');
 
   useEffect(() => {
-    const cached = localStorage.getItem('upsc_map_geodata');
-    if (cached) {
+    const data = safeGet('upsc_map_geodata', null);
+    if (data) {
       try {
-        const data = JSON.parse(cached);
         const geos: any = feature(data, data.objects.countries as any);
         setCountries(geos.features);
         setGeoData(data);
@@ -106,7 +105,7 @@ export default function MapView() {
       fetch(geoUrl)
         .then(res => res.json())
         .then(data => {
-          localStorage.setItem('upsc_map_geodata', JSON.stringify(data));
+          safeSet('upsc_map_geodata', data);
           const geos: any = feature(data, data.objects.countries as any);
           setCountries(geos.features);
           setGeoData(data);
@@ -474,6 +473,7 @@ export default function MapView() {
                         src={`https://flagcdn.com/w160/${selectedCountry.id?.toString().toLowerCase() || 'un'}.png`} 
                         alt="Flag" 
                         className="w-16 h-10 object-cover rounded-md shadow-lg border border-white/10 bg-white/10"
+                        referrerPolicy="no-referrer"
                         onError={(e) => (e.currentTarget.style.display = 'none')}
                       />
                       <div>

@@ -1,10 +1,21 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Question, QuestionCategory } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let aiInstance: any = null;
+function getAI() {
+  if (!aiInstance) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey || apiKey === "undefined") {
+      throw new Error("GEMINI_API_KEY is not defined. Please configure it in your environment.");
+    }
+    aiInstance = new GoogleGenAI({ apiKey });
+  }
+  return aiInstance;
+}
 
 export async function generateQuestions(category: QuestionCategory, count: number = 5): Promise<Question[]> {
   try {
+    const ai = getAI();
     const prompt = `Generate ${count} high-quality UPSC Prelims level multiple choice questions for the category: ${category}. 
     Ensure the questions follow the UPSC pattern (deep conceptual understanding or factual accuracy).
     Return the response as a JSON array where each object has:

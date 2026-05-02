@@ -18,3 +18,21 @@ export function calculateLevel(xp: number): number {
 export function getXPProgress(xp: number): number {
   return ((xp % 500) / 500) * 100;
 }
+
+export function safeGet(key: string, fallback: any) {
+  try {
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) : fallback;
+  } catch (e) {
+    console.error(`Error parsing storage for ${key}:`, e);
+    return fallback;
+  }
+}
+
+export function safeSet(key: string, value: any) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {
+    console.error(`Error saving to storage for ${key}:`, e);
+  }
+}

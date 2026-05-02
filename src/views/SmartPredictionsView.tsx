@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { TopicPrediction, UserStats } from '../types';
 import { getTopicPredictions } from '../services/geminiService';
-import { cn } from '../lib/utils';
+import { cn, safeGet } from '../lib/utils';
 
 export default function SmartPredictionsView() {
   const [predictions, setPredictions] = useState<TopicPrediction[]>([]);
@@ -25,8 +25,8 @@ export default function SmartPredictionsView() {
   const [stats, setStats] = useState<UserStats | null>(null);
 
   useEffect(() => {
-    const savedStats = localStorage.getItem('upsc_user_stats');
-    if (savedStats) setStats(JSON.parse(savedStats));
+    const savedStats = safeGet('upsc_smart_quiz_stats', null);
+    if (savedStats) setStats(savedStats);
     fetchPredictions();
   }, []);
 
