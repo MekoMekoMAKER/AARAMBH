@@ -47,7 +47,9 @@ export async function generateStudyPlan(stats: UserStats) {
       },
     });
 
-    return JSON.parse(response.text);
+    if (!response.text) return null;
+    const cleanText = response.text.replace(/```json\n?/, '').replace(/```\n?$/, '').trim();
+    return JSON.parse(cleanText);
   } catch (error) {
     console.error("Study Plan Error:", error);
     return null;
@@ -125,15 +127,17 @@ export async function analyzeAndGenerateQuestions(
     `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-3.1-pro-preview",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
       },
-      tools: [{ googleSearchRetrieval: {} }]
-    } as any);
+      tools: [{ googleSearch: {} }]
+    });
 
-    return JSON.parse(response.text);
+    if (!response.text) return null;
+    const cleanText = response.text.replace(/```json\n?/, '').replace(/```\n?$/, '').trim();
+    return JSON.parse(cleanText);
   } catch (error) {
     console.error("AI Analysis Error:", error);
     return null;
@@ -180,15 +184,17 @@ export async function generateCustomQuestions(
 
     const ai = getAI();
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-3.1-pro-preview",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
       },
-      tools: [{ googleSearchRetrieval: {} }]
-    } as any);
+      tools: [{ googleSearch: {} }]
+    });
 
-    return JSON.parse(response.text);
+    if (!response.text) return [];
+    const cleanText = response.text.replace(/```json\n?/, '').replace(/```\n?$/, '').trim();
+    return JSON.parse(cleanText);
   } catch (error) {
     console.error("Question Generation Error:", error);
     return [];
@@ -224,7 +230,9 @@ export async function getTopicPredictions(): Promise<TopicPrediction[]> {
       },
     });
 
-    const data = JSON.parse(response.text);
+    if (!response.text) return [];
+    const cleanText = response.text.replace(/```json\n?/, '').replace(/```\n?$/, '').trim();
+    const data = JSON.parse(cleanText);
     return data.predictions;
   } catch (error) {
     console.error("Prediction failed:", error);
@@ -263,7 +271,9 @@ export async function getCountryGeopoliticalAnalysis(countryName: string, indiaF
       },
     });
 
-    return JSON.parse(response.text);
+    if (!response.text) return null;
+    const cleanText = response.text.replace(/```json\n?/, '').replace(/```\n?$/, '').trim();
+    return JSON.parse(cleanText);
   } catch (error) {
     console.error("Geopolitical Analysis Error:", error);
     return null;
