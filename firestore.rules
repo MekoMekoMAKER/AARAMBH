@@ -1,0 +1,84 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // --- User Profiles ---
+    match /users/{userId} {
+      allow get: if isSignedIn(); // Allow reading other users? Maybe for forum profiles later.
+      allow list: if false; 
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data) &&
+        request.resource.data.userId == resource.data.userId; // Immutable userId
+
+      function isValidUser(data) {
+        return data.xp is int && data.level is int && 
+               data.streak is int && data.userId == request.auth.uid;
+      }
+    }
+
+    // --- Forum Posts ---
+    match /posts/{postId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidPost(request.resource.data);
+      allow update: if isSignedIn() && (
+        // Action: Edit content (Author only)
+        (request.auth.uid == resource.data.authorId && 
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'content', 'category'])) ||
+        // Action: Upvote (Any user)
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['upvotes'])) ||
+        // Action: Increment comment count (System/Trigger usually, or in transaction)
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['commentCount']))
+      );
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.authorId;
+
+      function isValidPost(data) {
+        return data.authorId == request.auth.uid && 
+               data.title is string && data.title.size() <= 100 &&
+               data.content is string && data.content.size() <= 4000 &&
+               data.category in ['Current Affairs', 'Strategy', 'Subject Doubts', 'General'];
+      }
+
+      // Comments sub-collection
+      match /comments/{commentId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn() && isValidComment(request.resource.data);
+        allow delete: if isSignedIn() && (request.auth.uid == resource.data.authorId);
+
+        function isValidComment(data) {
+          return data.authorId == request.auth.uid && 
+                 data.content is string && data.content.size() <= 1000 &&
+                 data.postId == postId;
+        }
+      }
+    }
+
+    // --- Saved Questions ---
+    match /saved_questions/{saveId} {
+      allow read, write: if isSignedIn() && 
+        (request.resource == null ? resource.data.userId == request.auth.uid : request.resource.data.userId == request.auth.uid);
+    }
+
+    // --- Study Plans ---
+    match /study_plans/{planId} {
+      allow read, write: if isSignedIn() && 
+        (request.resource == null ? resource.data.userId == request.auth.uid : request.resource.data.userId == request.auth.uid);
+    }
+  }
+}
