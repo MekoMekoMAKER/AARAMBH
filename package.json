@@ -21,6 +21,7 @@
     "firebase": "^12.12.1",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
+    "prop-types": "^15.8.1",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
     "react-markdown": "^10.1.0",
@@ -35,11 +36,13 @@
     "react-dom": "^19.0.1"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=18.0.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
+    "@types/prop-types": "^15.7.15",
+    "@types/react-simple-maps": "^3.0.6",
     "@types/topojson-client": "^3.1.5",
     "autoprefixer": "^10.4.21",
     "tailwindcss": "^4.1.14",

@@ -60,10 +60,11 @@ export async function analyzeAndGenerateQuestions(
   userPerformance?: string 
 ) {
   try {
+    const ai = getAI();
     const prompt = `
       You are a UPSC Content Architect and Historical Exam Researcher. 
       Deeply analyze the provided content and provide exam-relevant practice.
-
+      
       PRIORITY INSTRUCTION:
       1. Use Search Grounding to find REAL Preliminary Year Questions (PYQs) from UPSC (2013-2024) and State PSCs (UPPSC, BPSC, RAS, MPPSC) related to this content.
       2. MIX RATIO: Prioritize PYQs (aim for 70-80%). Use AI-generated questions ONLY as fallback if sufficient relevant PYQs aren't found.
@@ -177,6 +178,7 @@ export async function generateCustomQuestions(
       }
     `;
 
+    const ai = getAI();
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash",
       contents: prompt,
@@ -213,6 +215,7 @@ export async function getTopicPredictions(): Promise<TopicPrediction[]> {
       }
     `;
 
+    const ai = getAI();
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
@@ -251,6 +254,7 @@ export async function getCountryGeopoliticalAnalysis(countryName: string, indiaF
       }
     `;
 
+    const ai = getAI();
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,

@@ -20,7 +20,7 @@ import {
   Geography, 
   ZoomableGroup 
 } from "react-simple-maps";
-import { cn } from '../lib/utils';
+import { cn, safeGet, safeSet } from '../lib/utils';
 import { getCountryGeopoliticalAnalysis } from '../services/geminiService';
 
 import { feature } from "topojson-client";
